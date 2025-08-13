@@ -1,104 +1,49 @@
 import streamlit as st
+import pandas as pd
+import altair as alt
 
-# -----------------------------
-# MBTI별 진로 추천 데이터
-# -----------------------------
-career_data = {
-    "ISTJ": {
-        "title": "🛠️ 꼼꼼하고 책임감 있는 현실주의자",
-        "careers": ["회계사 📊", "변호사 ⚖️", "공무원 🏢", "데이터 분석가 📈"],
-        "reason": "ISTJ 유형은 체계적이고 신뢰할 수 있는 성격을 가지고 있어, 규칙과 절차가 중요한 직업에서 강점을 발휘합니다. 정확성과 책임감을 필요로 하는 분야에서 안정적으로 성장할 수 있어요."
-    },
-    "ISFJ": {
-        "title": "💖 헌신적이고 세심한 조력가",
-        "careers": ["간호사 🏥", "교사 📚", "사회복지사 🤝", "심리상담사 🧠"],
-        "reason": "ISFJ 유형은 타인을 배려하고 세심하게 살피는 능력이 뛰어나며, 봉사와 지원이 중요한 직업에서 큰 만족감을 느낍니다."
-    },
-    "INFJ": {
-        "title": "🌱 통찰력 있는 이상주의자",
-        "careers": ["작가 ✍️", "심리상담가 🧠", "사회운동가 ✊", "연구원 🔬"],
-        "reason": "INFJ 유형은 깊이 있는 사고와 강한 신념을 바탕으로 세상을 더 나은 방향으로 변화시키는 직업에 어울립니다."
-    },
-    "INTJ": {
-        "title": "♟️ 전략적이고 독창적인 기획자",
-        "careers": ["경영 컨설턴트 💼", "연구개발자 🔬", "정책분석가 📑", "IT 기획자 💻"],
-        "reason": "INTJ 유형은 체계적인 계획과 장기적인 비전을 세우는 데 능하며, 창의적 문제 해결이 필요한 직업에 강합니다."
-    },
-    "ISTP": {
-        "title": "🔧 실용적이고 분석적인 탐험가",
-        "careers": ["엔지니어 ⚙️", "파일럿 ✈️", "응급구조사 🚑", "보안 전문가 🔐"],
-        "reason": "ISTP 유형은 위기 상황에서도 침착하게 대처하며, 손으로 무언가를 직접 다루고 문제를 해결하는 일을 즐깁니다."
-    },
-    "ISFP": {
-        "title": "🎨 감성적이고 온화한 예술가",
-        "careers": ["디자이너 🖌️", "사진작가 📷", "음악가 🎵", "요리사 🍳"],
-        "reason": "ISFP 유형은 아름다움과 조화를 중시하며, 자신의 감각과 창의성을 표현할 수 있는 직업에서 행복을 느낍니다."
-    },
-    "INFP": {
-        "title": "💫 이상과 가치를 추구하는 꿈꾸는 자",
-        "careers": ["작가 ✍️", "예술가 🎭", "심리상담가 🧠", "사회운동가 ✊"],
-        "reason": "INFP 유형은 내면의 가치관이 뚜렷하고, 사람과 세상을 긍정적으로 변화시키는 데 열정을 쏟습니다."
-    },
-    "INTP": {
-        "title": "🧠 분석적이고 창의적인 사색가",
-        "careers": ["연구원 🔬", "개발자 💻", "이론 물리학자 📐", "발명가 🔧"],
-        "reason": "INTP 유형은 호기심이 많고, 복잡한 문제를 분석해 새로운 해결책을 제시하는 데 강점을 보입니다."
-    },
-    "ESTP": {
-        "title": "⚡ 에너지 넘치는 모험가",
-        "careers": ["기업가 💼", "영업 전문가 📈", "스포츠 선수 🏅", "이벤트 기획자 🎉"],
-        "reason": "ESTP 유형은 상황 판단이 빠르고 도전을 즐기며, 현장에서 즉각적인 성과를 만들어내는 직업에 잘 맞습니다."
-    },
-    "ESFP": {
-        "title": "🌟 사람들과 함께 빛나는 엔터테이너",
-        "careers": ["배우 🎬", "방송인 📺", "마케팅 전문가 📢", "여행 가이드 🌍"],
-        "reason": "ESFP 유형은 사교성이 뛰어나고 긍정적인 에너지를 전하며, 사람들과 교류하며 즐거움을 주는 일을 잘합니다."
-    },
-    "ENFP": {
-        "title": "🚀 열정 가득한 아이디어 뱅크",
-        "careers": ["크리에이티브 디렉터 🎨", "작가 ✍️", "창업가 💡", "홍보 전문가 📢"],
-        "reason": "ENFP 유형은 창의성과 열정을 바탕으로 새로운 기회를 만들고, 사람들에게 영감을 주는 일을 즐깁니다."
-    },
-    "ENTP": {
-        "title": "🪄 창의적이고 논리적인 토론가",
-        "careers": ["벤처기업가 🚀", "변호사 ⚖️", "기술 혁신가 🔬", "광고 기획자 📢"],
-        "reason": "ENTP 유형은 다양한 아이디어를 실험하고 논리적으로 설득하는 능력이 뛰어나, 변화와 도전을 즐깁니다."
-    },
-    "ESTJ": {
-        "title": "📋 체계적이고 리더십 있는 관리자",
-        "careers": ["경영자 💼", "군 장교 🎖️", "프로젝트 매니저 📊", "법률가 ⚖️"],
-        "reason": "ESTJ 유형은 규율과 조직을 중시하며, 리더십과 실행력을 발휘하는 직업에 적합합니다."
-    },
-    "ESFJ": {
-        "title": "🤝 따뜻하고 친근한 사교가",
-        "careers": ["교사 📚", "간호사 🏥", "이벤트 플래너 🎉", "홍보 전문가 📢"],
-        "reason": "ESFJ 유형은 사람들과 좋은 관계를 유지하고 협력하는 능력이 뛰어나, 서비스와 교육 분야에서 강점을 보입니다."
-    },
-    "ENFJ": {
-        "title": "🌈 타인을 성장시키는 카리스마 리더",
-        "careers": ["교육자 📚", "코치 🏆", "인사담당자 👥", "사회운동가 ✊"],
-        "reason": "ENFJ 유형은 타인의 잠재력을 이끌어내고 영감을 주는 능력이 탁월합니다."
-    },
-    "ENTJ": {
-        "title": "🚩 결단력 있는 야심가",
-        "careers": ["CEO 💼", "전략 기획가 📊", "변호사 ⚖️", "경영 컨설턴트 💡"],
-        "reason": "ENTJ 유형은 리더십과 결단력을 바탕으로 목표를 향해 나아가는 추진력이 뛰어납니다."
-    },
-}
+st.set_page_config(page_title="국가별 MBTI Top10", layout="centered")
 
-# -----------------------------
-# Streamlit UI 구성
-# -----------------------------
-st.set_page_config(page_title="MBTI 기반 진로 상담", page_icon="🎯", layout="centered")
+st.title("🌍 국가별 MBTI 유형 Top 10 시각화")
 
-st.title("🎯 MBTI 기반 고등학생 진로 상담")
-st.write("안녕하세요! 👋 당신의 **MBTI**를 선택하면, 추천 진로와 이유를 친절하게 알려드릴게요.")
+# 파일 불러오기
+@st.cache_data
+def load_data(file):
+    df = pd.read_csv(file)
+    return df
 
-mbti = st.selectbox("📌 MBTI를 선택하세요", options=list(career_data.keys()))
+# 파일 업로드 or 기본 파일 경로
+uploaded_file = st.file_uploader("CSV 파일 업로드", type=["csv"])
+if uploaded_file is not None:
+    df = load_data(uploaded_file)
+else:
+    df = load_data("countriesMBTI_16types.csv")  # 기본 파일 경로로 설정해주세요
 
-if mbti:
-    st.subheader(career_data[mbti]["title"])
-    st.write("**추천 진로:**")
-    st.write(", ".join(career_data[mbti]["careers"]))
-    st.write("**이유:**")
-    st.write(career_data[mbti]["reason"])
+# 국가 선택
+countries = df["Country"].tolist()
+selected_country = st.selectbox("국가를 선택하세요", countries)
+
+# 해당 국가의 MBTI 비율 상위 10개 추출
+def get_top10_mbti(df, country):
+    row = df[df["Country"] == country].iloc[0]
+    mbti_scores = row.drop("Country").sort_values(ascending=False)[:10]
+    return pd.DataFrame({
+        "MBTI": mbti_scores.index,
+        "비율": mbti_scores.values
+    })
+
+top10_df = get_top10_mbti(df, selected_country)
+
+# Altair 그래프
+chart = alt.Chart(top10_df).mark_bar().encode(
+    x=alt.X("비율:Q", title="비율", scale=alt.Scale(domain=[0, top10_df["비율"].max() * 1.1])),
+    y=alt.Y("MBTI:N", sort="-x", title="MBTI 유형"),
+    color=alt.Color("MBTI:N", legend=None),
+    tooltip=["MBTI", "비율"]
+).properties(
+    width=600,
+    height=400,
+    title=f"{selected_country}의 MBTI 유형 Top 10"
+)
+
+st.altair_chart(chart, use_container_width=True)
